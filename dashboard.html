@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RigReady Supervisor Dashboard</title>
+<meta name="description" content="Crew readiness for the RigReady Mud Pump Lockout module.">
+<meta name="theme-color" content="#0d1b2a">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/src/dashboard.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap head">
+    <div><div class="brand">▲ RigReady</div><h1>Supervisor dashboard</h1><p class="sub">Mud Pump Lockout module · who is ready before they fly out</p></div>
+    <a class="btn primary" href="./index.html">Open the trainer</a>
+  </div>
+</header>
+<main class="wrap">
+  <section class="cards" aria-label="Summary">
+    <div class="kpi"><span>Trainees</span><b id="kTrainees">0</b></div>
+    <div class="kpi"><span>Attempts</span><b id="kAttempts">0</b></div>
+    <div class="kpi"><span>Pass rate</span><b id="kPass">0%</b></div>
+    <div class="kpi"><span>Average score</span><b id="kAvg">0</b></div>
+    <div class="kpi wide"><span>Most missed step</span><b id="kMissed">None yet</b></div>
+  </section>
+
+  <section aria-labelledby="crewH">
+    <div class="sec-head"><h2 id="crewH">Crew readiness</h2><span class="hint">Best attempt per trainee</span></div>
+    <div id="crew" class="crew"></div>
+  </section>
+
+  <section aria-labelledby="attH">
+    <div class="sec-head"><h2 id="attH">All attempts</h2>
+      <div class="tools"><button id="sampleBtn" class="btn ghost">Load sample crew</button><button id="csvBtn" class="btn ghost">Export CSV</button><button id="clearBtn" class="btn ghost danger">Clear all</button></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Trainee</th><th>Date</th><th>Mode</th><th>Time</th><th>Mistakes</th><th>Incidents</th><th>Score</th><th>Result</th><th>Readiness</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p id="empty" class="empty">No attempts yet. Open the trainer, finish a run, and it shows up here. Or load the sample crew to see how it looks.</p>
+  </section>
+  <p class="note">For the demo, results are stored in this browser only (offline, no server). Swap <code>src/storage.js</code> for the Neon version to give the whole crew one shared dashboard.</p>
+</main>
+<footer class="foot">Demo procedure is a generic LOTO pattern; verify against your company's procedure.</footer>
+<script type="module" src="/src/dashboard.js"></script>
+</body>
+</html>

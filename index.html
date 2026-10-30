@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>RigReady: Mud Pump Lockout</title>
+<meta name="description" content="Before you board: practise a mud pump swab and liner change with lockout and tagout, in 3D, on any phone. No headset.">
+<meta name="theme-color" content="#0d1b2a">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+<canvas id="scene" aria-label="3D rig deck"></canvas>
+<div id="flash"></div>
+
+<section id="title" class="overlay title" aria-labelledby="titleH">
+  <div class="title-card">
+    <div class="brand"><span class="logo" aria-hidden="true">▲</span> RigReady</div>
+    <h1 id="titleH">Mud Pump Lockout</h1>
+    <p class="tagline">Before you board: practise the job safely</p>
+    <p class="intro">Walk a 3D rig deck, then change the worn swab and liner on a triplex mud pump the safe way: permit, PPE, your own lock and tag, bleed down, verify, repair, restore. Get it wrong and you will see exactly how people get hurt.</p>
+    <label class="field" for="nameInput">Trainee name</label>
+    <input id="nameInput" type="text" maxlength="24" placeholder="Pick a name, e.g. Bunmi" autocomplete="off" enterkeyhint="go">
+    <p id="nameErr" class="err" hidden>Pick a name first so the supervisor knows whose attempt this is.</p>
+    <div class="modes" role="group" aria-label="Mode">
+      <button type="button" class="pill" data-mode="practice">Practice<small>hints on</small></button>
+      <button type="button" class="pill" data-mode="assess">Assessment<small>no hints</small></button>
+    </div>
+    <button id="startBtn" class="primary big">Start training</button>
+    <a class="link" href="./dashboard.html">Supervisor dashboard →</a>
+  </div>
+  <footer class="foot">Demo procedure is a generic LOTO pattern; verify against your company's procedure.</footer>
+</section>
+
+<div id="hud" hidden>
+  <div id="objCard" class="obj" role="button" tabindex="0" aria-label="Objectives, tap to expand">
+    <div class="obj-top"><span id="phase" class="phase">Deck walk</span><span id="objCount" class="count">0 / 0</span></div>
+    <div id="objTitle" class="obj-title"></div>
+    <div id="objHint" class="obj-hint"></div>
+    <div class="bar"><i id="objBar"></i></div>
+    <ol id="objList" class="obj-list"></ol>
+  </div>
+  <div class="stats">
+    <span class="stat" title="Time"><i>⏱</i><b id="timer">0:00</b></span>
+    <span class="stat warn" title="Mistakes"><i>✖</i><b id="mistakes">0</b></span>
+    <span class="stat bad" title="Incidents"><i>⚠️</i><b id="incidents">0</b></span>
+    <button id="muteBtn" class="icon" aria-label="Mute sound">🔊</button>
+    <button id="exitBtn" class="icon" aria-label="Leave attempt">✕</button>
+  </div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="compass" hidden><span id="compassArrow">▲</span><b id="compassDist"></b></div>
+  <div class="inv">
+    <div id="ppeBar" class="chips" aria-label="PPE"><span class="chip" data-ppe="hardhat" title="Hard hat">⛑️</span><span class="chip" data-ppe="glasses" title="Safety glasses">🥽</span><span class="chip" data-ppe="gloves" title="Gloves">🧤</span><span class="chip" data-ppe="boots" title="Safety boots">🥾</span></div>
+    <div id="toolBar" class="chips" aria-label="Tools"></div>
+  </div>
+  <div id="joy" aria-hidden="true"><div id="joyKnob"></div></div>
+  <div id="keysHint" class="keys">W A S D to move · drag to look · click to act</div>
+  <div id="tip" hidden></div>
+</div>
+
+<div id="modal" class="overlay dim" hidden><div id="modalCard" class="card modal-card"><div id="modalBody"></div></div></div>
+
+<div id="incident" class="overlay dim red" hidden>
+  <div class="card incident-card" role="alertdialog" aria-labelledby="incTitle">
+    <div class="inc-head">⚠️ Incident</div>
+    <h2 id="incTitle"></h2>
+    <p id="incWhat"></p>
+    <div class="real"><div id="incRealLabel" class="real-label">This really happened</div><p id="incReal"></p><a id="incSrc" target="_blank" rel="noopener"></a></div>
+    <p class="lesson"><b>Lesson:</b> <span id="incLesson"></span></p>
+    <button id="incRetry" class="primary">Rewind and try again</button>
+  </div>
+</div>
+
+<section id="score" class="overlay dim" hidden>
+  <div class="card score-card">
+    <div class="score-top">
+      <div id="scRing" class="ring"><b id="scScore">0</b><small>safety score</small></div>
+      <div>
+        <div class="eyebrow"><span id="scName"></span> · <span id="scMode"></span></div>
+        <div id="scVerdict" class="verdict">PASS</div>
+        <div class="ready">Readiness: <b id="scReady"></b></div>
+        <div class="minis"><span>⏱ <b id="scTime"></b></span><span>✖ <b id="scMistakes"></b> <span id="scMistakesL">mistakes</span></span><span>⚠️ <b id="scIncidents"></b> <span id="scIncidentsL">incidents</span></span></div>
+      </div>
+    </div>
+    <h3>What you did right and wrong</h3>
+    <ul id="scList" class="checklist"></ul>
+    <ul id="scNotes" class="notes"></ul>
+    <div class="row wrap"><button id="titleBtn" class="ghost">Change trainee</button><a class="ghost btn" href="./dashboard.html">Supervisor dashboard</a><button id="againBtn" class="primary">Try again</button></div>
+    <footer class="foot in">Demo procedure is a generic LOTO pattern; verify against your company's procedure.</footer>
+  </div>
+</section>
+
+<div id="rotate" class="overlay rotate" hidden>
+  <div class="phone" aria-hidden="true"></div>
+  <p><b>Rotate your phone</b><br>RigReady plays best in landscape.</p>
+  <button id="portraitOk" class="ghost">Play in portrait anyway</button>
+</div>
+
+<noscript><p style="padding:2rem;color:#fff">RigReady needs JavaScript and WebGL to run.</p></noscript>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

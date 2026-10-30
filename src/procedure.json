@@ -1,0 +1,511 @@
+{
+  "module": "RigReady: Mud Pump Lockout",
+  "version": "0.1",
+  "job": "Change the worn #2 swab and liner on Mud Pump 1. Mud Pump 2 stays in service.",
+  "passMark": 75,
+  "readyMark": 90,
+  "scoring": {
+    "start": 100,
+    "mistake": 8,
+    "incident": 35
+  },
+  "phases": [
+    "Deck walk",
+    "Prepare",
+    "Isolate",
+    "Repair",
+    "Restore"
+  ],
+  "checks": {
+    "permit": "Permit signed before touching equipment",
+    "ppe": "Full PPE on before touching equipment",
+    "permit_form": "Permit filled in correctly",
+    "right_breaker": "Isolated the right breaker (MP-1)",
+    "own_lock": "Own lock and tag on before opening the pump",
+    "bleed": "Pressure bled to zero before opening",
+    "verify": "Isolation verified with a try-start",
+    "tools": "Picked only the right tools",
+    "stop_work": "Refused to let anyone remove your lock",
+    "lock_until_done": "Lock stayed on until the pump was closed up",
+    "clear_area": "Area cleared before removing the lock",
+    "restore_order": "Valves restored before the test run"
+  },
+  "steps": [
+    {
+      "id": "visit_muster",
+      "phase": "Deck walk",
+      "title": "Find the muster point",
+      "hint": "If the alarm sounds, this is where everyone gathers. Follow the beacon to the green sign.",
+      "target": "muster",
+      "visit": true
+    },
+    {
+      "id": "visit_pump",
+      "phase": "Deck walk",
+      "title": "Locate Mud Pump 1",
+      "hint": "The pump you will work on. Pump 2 next to it is running and stays in service.",
+      "target": "pump",
+      "visit": true
+    },
+    {
+      "id": "visit_mcc",
+      "phase": "Deck walk",
+      "title": "Locate the breaker panel (MCC)",
+      "hint": "The Motor Control Centre feeds power to the pumps. This is where you isolate.",
+      "target": "mcc",
+      "visit": true
+    },
+    {
+      "id": "permit",
+      "phase": "Prepare",
+      "title": "Get the permit to work signed",
+      "hint": "Tap the permit board on the office wall. No permit, no work.",
+      "target": "permit"
+    },
+    {
+      "id": "ppe",
+      "phase": "Prepare",
+      "title": "Put on your PPE",
+      "hint": "Tap each item in the locker: hard hat, glasses, gloves, boots.",
+      "target": "locker"
+    },
+    {
+      "id": "breaker_off",
+      "phase": "Isolate",
+      "title": "Switch Mud Pump 1 OFF at the MCC",
+      "hint": "Find the breaker labelled MP-1 and tap its handle. Read the labels carefully.",
+      "target": "mcc",
+      "requires": [
+        {
+          "step": "permit",
+          "outcome": "block",
+          "check": "permit",
+          "message": "No permit, no work. Get the permit to work signed first."
+        },
+        {
+          "step": "ppe",
+          "outcome": "block",
+          "check": "ppe",
+          "message": "PPE first. Put on your hard hat, glasses, gloves and boots before you touch equipment."
+        }
+      ]
+    },
+    {
+      "id": "lock",
+      "phase": "Isolate",
+      "title": "Attach YOUR padlock and tag",
+      "hint": "Tap the lockout hasp on the MP-1 breaker. Only you hold the key.",
+      "target": "mcc",
+      "requires": [
+        {
+          "step": "breaker_off",
+          "outcome": "block",
+          "message": "Switch the breaker OFF before you lock it."
+        }
+      ]
+    },
+    {
+      "id": "valves",
+      "phase": "Isolate",
+      "title": "Close the suction and discharge valves",
+      "hint": "Tap both handwheels at the pump. Pump 2 shares the manifold, so the line is still live.",
+      "target": "valves",
+      "requires": [
+        {
+          "step": "permit",
+          "outcome": "block",
+          "check": "permit",
+          "message": "No permit, no work. Get the permit to work signed first."
+        },
+        {
+          "step": "ppe",
+          "outcome": "block",
+          "check": "ppe",
+          "message": "PPE first. Put on your hard hat, glasses, gloves and boots before you touch equipment."
+        }
+      ]
+    },
+    {
+      "id": "bleed",
+      "phase": "Isolate",
+      "title": "Bleed the pressure to zero",
+      "hint": "Open the yellow bleed valve and watch the gauge drop to 0 psi.",
+      "target": "valves",
+      "requires": [
+        {
+          "step": "valves",
+          "outcome": "block",
+          "message": "Close both valves first. With them open, Pump 2 keeps feeding pressure into the line."
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "phase": "Isolate",
+      "title": "Try to start the pump",
+      "hint": "Press START at the local control station. If isolation is good, nothing happens.",
+      "target": "start",
+      "requires": [
+        {
+          "step": "lock",
+          "outcome": "mistake",
+          "effect": "pump_runs",
+          "check": "own_lock",
+          "message": "The pump started! Nothing was locked out, so START worked. Lock out first, then test."
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "phase": "Repair",
+      "title": "Pick the right tools",
+      "hint": "From the tool store, take only what this job needs. Three tools are right.",
+      "target": "rack"
+    },
+    {
+      "id": "open_cover",
+      "phase": "Repair",
+      "title": "Open the #2 module cover",
+      "hint": "Tap the middle cylinder head on the front of the pump.",
+      "target": "pump",
+      "requires": [
+        {
+          "step": "tools",
+          "outcome": "block",
+          "message": "You need the cover wrench. Get your tools from the tool store."
+        },
+        {
+          "step": "lock",
+          "outcome": "incident",
+          "incident": "no_lock",
+          "check": "own_lock"
+        },
+        {
+          "step": "bleed",
+          "outcome": "incident",
+          "incident": "no_bleed",
+          "check": "bleed"
+        },
+        {
+          "step": "verify",
+          "outcome": "mistake",
+          "check": "verify",
+          "message": "You skipped the try-start. Always prove the isolation works before your hands go in."
+        }
+      ]
+    },
+    {
+      "id": "remove_old",
+      "phase": "Repair",
+      "title": "Remove the worn swab and liner",
+      "hint": "Tap the old liner inside the open module to pull it out.",
+      "target": "pump",
+      "requires": [
+        {
+          "step": "open_cover",
+          "outcome": "block",
+          "message": "Open the module cover first."
+        }
+      ]
+    },
+    {
+      "id": "stop_work",
+      "phase": "Repair",
+      "title": "Deal with the interruption",
+      "hint": "Someone wants your lock. Decide.",
+      "target": "pump",
+      "hidden": true
+    },
+    {
+      "id": "fit_new",
+      "phase": "Repair",
+      "title": "Fit the new swab and liner",
+      "hint": "Tap the new liner on the spares stand to fit it.",
+      "target": "pump",
+      "requires": [
+        {
+          "step": "remove_old",
+          "outcome": "block",
+          "message": "Take the worn liner out first."
+        }
+      ]
+    },
+    {
+      "id": "close_cover",
+      "phase": "Repair",
+      "title": "Refit the module cover",
+      "hint": "Tap the cover on its stand to put it back and torque it up.",
+      "target": "pump",
+      "requires": [
+        {
+          "step": "fit_new",
+          "outcome": "block",
+          "message": "Fit the new liner before closing up."
+        }
+      ]
+    },
+    {
+      "id": "clear",
+      "phase": "Restore",
+      "title": "Clear the area",
+      "hint": "Put your tools away (tap the tool tray) and drop the old liner in the scrap bin.",
+      "target": "pump",
+      "requires": [
+        {
+          "step": "close_cover",
+          "outcome": "block",
+          "message": "Close the pump up before you clear away."
+        }
+      ]
+    },
+    {
+      "id": "restore_valves",
+      "phase": "Restore",
+      "title": "Close the bleed, reopen the valves",
+      "hint": "Close the bleed valve, then open the suction and discharge handwheels.",
+      "target": "valves",
+      "requires": [
+        {
+          "step": "close_cover",
+          "outcome": "block",
+          "message": "The cover is off. Opening the valves now would flood the deck with mud."
+        }
+      ]
+    },
+    {
+      "id": "unlock",
+      "phase": "Restore",
+      "title": "Remove your lock and tag",
+      "hint": "Only now, with the job closed up, take YOUR lock off the MP-1 breaker.",
+      "target": "mcc",
+      "requires": [
+        {
+          "step": "close_cover",
+          "outcome": "incident",
+          "incident": "early_unlock",
+          "check": "lock_until_done"
+        },
+        {
+          "step": "clear",
+          "outcome": "mistake",
+          "check": "clear_area",
+          "message": "The area is not clear. Tools and scrap are still at the pump. Clear up before you de-isolate."
+        }
+      ]
+    },
+    {
+      "id": "breaker_on",
+      "phase": "Restore",
+      "title": "Switch Mud Pump 1 back ON",
+      "hint": "Tap the MP-1 handle to restore power.",
+      "target": "mcc",
+      "requires": [
+        {
+          "step": "unlock",
+          "outcome": "block",
+          "message": "Your lock is on that breaker. Remove it first."
+        }
+      ]
+    },
+    {
+      "id": "test_run",
+      "phase": "Restore",
+      "title": "Test run the pump",
+      "hint": "Press START at the local control station and check it runs smoothly.",
+      "target": "start",
+      "requires": [
+        {
+          "step": "breaker_on",
+          "outcome": "block",
+          "message": "No power. The breaker is still off."
+        },
+        {
+          "step": "restore_valves",
+          "outcome": "mistake",
+          "check": "restore_order",
+          "message": "The valves were still closed. The pump dead-headed and the relief valve popped. Open the valves before starting."
+        }
+      ]
+    },
+    {
+      "id": "close_permit",
+      "phase": "Restore",
+      "title": "Hand back the permit",
+      "hint": "Return to the permit board and sign the job off.",
+      "target": "permit"
+    }
+  ],
+  "permit": {
+    "number": "PTW-0142",
+    "options": [
+      {
+        "id": "elec",
+        "label": "Electrical: MCC breaker MP-1 off, locked and tagged",
+        "correct": true
+      },
+      {
+        "id": "mech",
+        "label": "Mechanical: suction and discharge valves closed",
+        "correct": true
+      },
+      {
+        "id": "press",
+        "label": "Pressure: line bled to 0 psi",
+        "correct": true
+      },
+      {
+        "id": "driller",
+        "label": "Driller told Pump 1 is going down",
+        "correct": true
+      },
+      {
+        "id": "hot",
+        "label": "Hot work (welding or grinding)",
+        "correct": false,
+        "why": "No hot work on this job. Hot work needs its own permit."
+      },
+      {
+        "id": "pump2",
+        "label": "Shut down Pump 2 as well",
+        "correct": false,
+        "why": "Pump 2 stays in service so drilling can continue."
+      }
+    ]
+  },
+  "ppe": [
+    {
+      "id": "hardhat",
+      "label": "Hard hat"
+    },
+    {
+      "id": "glasses",
+      "label": "Safety glasses"
+    },
+    {
+      "id": "gloves",
+      "label": "Gloves"
+    },
+    {
+      "id": "boots",
+      "label": "Safety boots"
+    }
+  ],
+  "breakers": [
+    {
+      "id": "mp1",
+      "label": "MP-1",
+      "sub": "MUD PUMP 1",
+      "target": true
+    },
+    {
+      "id": "mp2",
+      "label": "MP-2",
+      "sub": "MUD PUMP 2",
+      "why": "That was MP-2, the pump in service. Drilling just lost circulation. Switch it back and read the label: MP-1."
+    },
+    {
+      "id": "shk",
+      "label": "SHK",
+      "sub": "SHAKERS",
+      "why": "Wrong breaker. That one feeds the shale shakers. Switch it back."
+    },
+    {
+      "id": "lts",
+      "label": "LTS",
+      "sub": "DECK LIGHTS",
+      "why": "Wrong breaker. That one feeds the deck lights. Switch it back."
+    }
+  ],
+  "tools": [
+    {
+      "id": "cover_wrench",
+      "label": "Cover wrench",
+      "correct": true
+    },
+    {
+      "id": "pipe_wrench",
+      "label": "Pipe wrench",
+      "correct": false,
+      "why": "A pipe wrench rounds off the cover lugs. Wrong tool."
+    },
+    {
+      "id": "clamp_wrench",
+      "label": "Rod clamp wrench",
+      "correct": true
+    },
+    {
+      "id": "cheater",
+      "label": "Cheater bar",
+      "correct": false,
+      "why": "A cheater bar overloads tools and slips. It is not part of this job."
+    },
+    {
+      "id": "liner_puller",
+      "label": "Liner puller",
+      "correct": true
+    },
+    {
+      "id": "grinder",
+      "label": "Angle grinder",
+      "correct": false,
+      "why": "Grinding is hot work and needs its own permit. Not on this job."
+    }
+  ],
+  "distractor": {
+    "speaker": "Tunde (motorman)",
+    "line": "Abeg, the electrician needs that MCC for Pump 2. Can I take your lock off for a few minutes? I go put am back, I promise.",
+    "choices": [
+      {
+        "id": "refuse",
+        "label": "No. My lock stays on until I finish. Get the toolpusher if it is urgent.",
+        "correct": true,
+        "reply": "Fair enough. I will talk to the toolpusher."
+      },
+      {
+        "id": "accept",
+        "label": "Okay, but be quick.",
+        "correct": false
+      },
+      {
+        "id": "key",
+        "label": "Here, take my key and sort it out.",
+        "correct": false
+      }
+    ]
+  },
+  "incidentSource": {
+    "title": "IADC Safety Alert 08-14: Mud Pump Maintenance Results in Serious Injury",
+    "url": "https://iadc.org/safety-alerts/alert-08-14-mud-pump-maintenance-results-serious-injury/",
+    "plain": "A mud pump was shut down to change a swab. Only one lock went on the breaker and no other lockout steps were done. Before the job was finished, the motorman removed the lock and told the driller to go ahead. The driller primed the pump while the derrickman was still working on it. His lower leg was caught between the rod clamp and the pump and was seriously injured."
+  },
+  "incidents": {
+    "no_lock": {
+      "title": "The pump started while you were in it",
+      "what": "You opened the pump without your own lock on the breaker. Up on the drill floor, the driller did not know you were working and primed the pump. The rod clamp moved.",
+      "lesson": "Your lock, your key. Nobody can start what you have locked.",
+      "source": "iadc"
+    },
+    "early_unlock": {
+      "title": "You removed your lock too early",
+      "what": "The cover was still off and the job was not finished. With your lock gone, the breaker looked free, and the driller primed the pump.",
+      "lesson": "Locks come off last: after the pump is closed up, the area is clear, and everyone is out of the line of fire.",
+      "source": "iadc"
+    },
+    "lock_removed": {
+      "title": "Someone else took your lock off",
+      "what": "You let a crewmate remove your lock. A few minutes later the driller primed the pump while you were still fitting the liner.",
+      "lesson": "Use your Stop Work Authority. Nobody removes your lock but you, whatever the pressure.",
+      "source": "iadc"
+    },
+    "no_bleed": {
+      "title": "Trapped pressure blew the cover",
+      "what": "The line still held pressure from Pump 2. As the cover came loose it shot off, and mud sprayed across the deck where you were standing.",
+      "lesson": "Isolation means power AND pressure. Bleed down and read 0 psi on the gauge before you open anything.",
+      "source": "iogp"
+    }
+  },
+  "iogp": {
+    "title": "IOGP Life-Saving Rule: Energy Isolation",
+    "plain": "Verify isolation and zero energy before work begins."
+  }
+}
